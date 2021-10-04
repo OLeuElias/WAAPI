@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -15,6 +16,7 @@ using Microsoft.OpenApi.Models;
 using WAAPI.Data;
 using WAAPI.Middlewares;
 using WAAPI.Models;
+using WAAPI.Services;
 
 namespace WAAPI
 {
@@ -39,6 +41,13 @@ namespace WAAPI
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "WAAPI", Version = "v1" });
+            });
+            services.AddHttpContextAccessor();
+            services.AddSingleton<IUriService>(o => {
+                var accessor = o.GetRequiredService<IHttpContextAccessor>();
+                var request = accessor.HttpContext.Request;
+                var uri = string.Concat(request.Scheme, "://", request.Host.ToUriComponent());
+                return new UriService(uri);
             });
         }
 
